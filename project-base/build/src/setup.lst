@@ -1,0 +1,210 @@
+GAS LISTING /tmp/ccw1O1Kp.s 			page 1
+
+
+   1              		.file	"setup.cpp"
+   2              		.option pic
+   3              		.option norelax
+   4              		.text
+   5              	.Ltext0:
+   6              		.align	2
+   7              		.globl	_Z9heapSetupv
+   9              	_Z9heapSetupv:
+  10              	.LFB1:
+  11              		.file 1 "src/setup.cpp"
+   1:src/setup.cpp **** //
+   2:src/setup.cpp **** // Created by os on 8/4/22.
+   3:src/setup.cpp **** //
+   4:src/setup.cpp **** 
+   5:src/setup.cpp **** #include "../h/setup.hpp"
+   6:src/setup.cpp **** 
+   7:src/setup.cpp **** //ovaj kod radi alignment u 1 linije --> promeni posle i pazi jer zaokruzuje na prvu vecu ili jedna
+   8:src/setup.cpp **** //a =  (void*)((uint64(a) + uint64(MEM_BLOCK_SIZE) - 1) &~ uint64(MEM_BLOCK_SIZE - 1));
+   9:src/setup.cpp **** 
+  10:src/setup.cpp **** 
+  11:src/setup.cpp **** int heapSetup() {
+  12              		.loc 1 11 17
+  13              		.cfi_startproc
+  14 0000 130101FF 		addi	sp,sp,-16
+  15              		.cfi_def_cfa_offset 16
+  16 0004 23348100 		sd	s0,8(sp)
+  17              		.cfi_offset 8, -8
+  18 0008 13040101 		addi	s0,sp,16
+  19              		.cfi_def_cfa 8, 0
+  12:src/setup.cpp **** 
+  13:src/setup.cpp ****     MemoryAllocator::hStart = (void*)((uint64(HEAP_START_ADDR) + uint64(MEM_BLOCK_SIZE) - 1) &~ uin
+  20              		.loc 1 13 5
+  21              		.loc 1 13 89 is_stmt 0
+  22 000c 97070000 		la	a5,HEAP_START_ADDR
+  22      83B70700 
+  23 0014 83B70700 		ld	a5,0(a5)
+  24 0018 9387F703 		addi	a5,a5,63
+  25              		.loc 1 13 94
+  26 001c 93F707FC 		andi	a5,a5,-64
+  27              		.loc 1 13 29
+  28 0020 17070000 		la	a4,_ZN15MemoryAllocator6hStartE
+  28      03370700 
+  29 0028 2330F700 		sd	a5,0(a4)
+  14:src/setup.cpp ****     MemoryAllocator::hEnd = (void*)((uint64(HEAP_END_ADDR) + uint64(MEM_BLOCK_SIZE) - 1) &~ uint64(
+  30              		.loc 1 14 5 is_stmt 1
+  31              		.loc 1 14 85 is_stmt 0
+  32 002c 17070000 		la	a4,HEAP_END_ADDR
+  32      03370700 
+  33 0034 83360700 		ld	a3,0(a4)
+  34 0038 1387F603 		addi	a4,a3,63
+  35              		.loc 1 14 90
+  36 003c 137707FC 		andi	a4,a4,-64
+  37              		.loc 1 14 27
+  38 0040 17060000 		la	a2,_ZN15MemoryAllocator4hEndE
+  38      03360600 
+  39 0048 2330E600 		sd	a4,0(a2)
+  15:src/setup.cpp **** 
+GAS LISTING /tmp/ccw1O1Kp.s 			page 2
+
+
+  16:src/setup.cpp ****     if (uint64(MemoryAllocator::hEnd) > (uint64) HEAP_END_ADDR)
+  40              		.loc 1 16 5 is_stmt 1
+  41 004c 63F6E600 		bgeu	a3,a4,.L2
+  17:src/setup.cpp ****         MemoryAllocator::hEnd = (void*)((uint64)MemoryAllocator::hEnd -(uint64)MEM_BLOCK_SIZE); // 
+  42              		.loc 1 17 9
+  43              		.loc 1 17 71 is_stmt 0
+  44 0050 130707FC 		addi	a4,a4,-64
+  45              		.loc 1 17 31
+  46 0054 2330E600 		sd	a4,0(a2)
+  47              	.L2:
+  18:src/setup.cpp **** 
+  19:src/setup.cpp ****     //inicijalizujemo blk header za prvi slobodan blok
+  20:src/setup.cpp ****     MemoryAllocator::freeMemHead = (BlockHeader*) MemoryAllocator::hStart;
+  48              		.loc 1 20 5 is_stmt 1
+  49              		.loc 1 20 34 is_stmt 0
+  50 0058 17070000 		la	a4,_ZN15MemoryAllocator11freeMemHeadE
+  50      03370700 
+  51 0060 2330F700 		sd	a5,0(a4)
+  21:src/setup.cpp ****     (*MemoryAllocator::freeMemHead).next = (*MemoryAllocator::freeMemHead).prev = nullptr;
+  52              		.loc 1 21 5 is_stmt 1
+  53              		.loc 1 21 81 is_stmt 0
+  54 0064 23B00700 		sd	zero,0(a5)
+  55              		.loc 1 21 6
+  56 0068 03370700 		ld	a4,0(a4)
+  57              		.loc 1 21 42
+  58 006c 23340700 		sd	zero,8(a4)
+  22:src/setup.cpp ****     (*MemoryAllocator::freeMemHead).size = ((uint64)MemoryAllocator::hEnd - (uint64)MemoryAllocator
+  59              		.loc 1 22 5 is_stmt 1
+  60              		.loc 1 22 75 is_stmt 0
+  61 0070 97070000 		la	a5,_ZN15MemoryAllocator4hEndE
+  61      83B70700 
+  62 0078 83B70700 		ld	a5,0(a5)
+  63 007c 97060000 		la	a3,_ZN15MemoryAllocator6hStartE
+  63      83B60600 
+  64 0084 83B60600 		ld	a3,0(a3)
+  65 0088 B387D740 		sub	a5,a5,a3
+  66              		.loc 1 22 109
+  67 008c 93D76700 		srli	a5,a5,6
+  68              		.loc 1 22 42
+  69 0090 2338F700 		sd	a5,16(a4)
+  23:src/setup.cpp ****     return 0;
+  70              		.loc 1 23 5 is_stmt 1
+  24:src/setup.cpp **** }...
+  71              		.loc 1 24 1 is_stmt 0
+  72 0094 13050000 		li	a0,0
+  73 0098 03348100 		ld	s0,8(sp)
+  74              		.cfi_restore 8
+  75              		.cfi_def_cfa 2, 16
+  76 009c 13010101 		addi	sp,sp,16
+  77              		.cfi_def_cfa_offset 0
+  78 00a0 67800000 		jr	ra
+  79              		.cfi_endproc
+  80              	.LFE1:
+  82              	.Letext0:
+  83              		.file 2 "src/../h/../lib/hw.h"
+  84              		.file 3 "src/../h/../h/MemoryAllocator.hpp"
+GAS LISTING /tmp/ccw1O1Kp.s 			page 3
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 setup.cpp
+     /tmp/ccw1O1Kp.s:9      .text:0000000000000000 _Z9heapSetupv
+     /tmp/ccw1O1Kp.s:13     .text:0000000000000000 .L0 
+     /tmp/ccw1O1Kp.s:14     .text:0000000000000000 .L0 
+     /tmp/ccw1O1Kp.s:15     .text:0000000000000004 .L0 
+     /tmp/ccw1O1Kp.s:17     .text:0000000000000008 .L0 
+     /tmp/ccw1O1Kp.s:19     .text:000000000000000c .L0 
+     /tmp/ccw1O1Kp.s:21     .text:000000000000000c .L0 
+     /tmp/ccw1O1Kp.s:22     .text:000000000000000c .L0 
+     /tmp/ccw1O1Kp.s:26     .text:000000000000001c .L0 
+     /tmp/ccw1O1Kp.s:28     .text:0000000000000020 .L0 
+     /tmp/ccw1O1Kp.s:31     .text:000000000000002c .L0 
+     /tmp/ccw1O1Kp.s:32     .text:000000000000002c .L0 
+     /tmp/ccw1O1Kp.s:36     .text:000000000000003c .L0 
+     /tmp/ccw1O1Kp.s:38     .text:0000000000000040 .L0 
+     /tmp/ccw1O1Kp.s:41     .text:000000000000004c .L0 
+     /tmp/ccw1O1Kp.s:43     .text:0000000000000050 .L0 
+     /tmp/ccw1O1Kp.s:44     .text:0000000000000050 .L0 
+     /tmp/ccw1O1Kp.s:46     .text:0000000000000054 .L0 
+     /tmp/ccw1O1Kp.s:49     .text:0000000000000058 .L0 
+     /tmp/ccw1O1Kp.s:50     .text:0000000000000058 .L0 
+     /tmp/ccw1O1Kp.s:53     .text:0000000000000064 .L0 
+     /tmp/ccw1O1Kp.s:54     .text:0000000000000064 .L0 
+     /tmp/ccw1O1Kp.s:56     .text:0000000000000068 .L0 
+     /tmp/ccw1O1Kp.s:58     .text:000000000000006c .L0 
+     /tmp/ccw1O1Kp.s:60     .text:0000000000000070 .L0 
+     /tmp/ccw1O1Kp.s:61     .text:0000000000000070 .L0 
+     /tmp/ccw1O1Kp.s:67     .text:000000000000008c .L0 
+     /tmp/ccw1O1Kp.s:69     .text:0000000000000090 .L0 
+     /tmp/ccw1O1Kp.s:71     .text:0000000000000094 .L0 
+     /tmp/ccw1O1Kp.s:72     .text:0000000000000094 .L0 
+     /tmp/ccw1O1Kp.s:74     .text:000000000000009c .L0 
+     /tmp/ccw1O1Kp.s:75     .text:000000000000009c .L0 
+     /tmp/ccw1O1Kp.s:77     .text:00000000000000a0 .L0 
+     /tmp/ccw1O1Kp.s:79     .text:00000000000000a4 .L0 
+     /tmp/ccw1O1Kp.s:85     .text:00000000000000a4 .L0 
+     /tmp/ccw1O1Kp.s:22     .text:000000000000000c .L0 
+     /tmp/ccw1O1Kp.s:28     .text:0000000000000020 .L0 
+     /tmp/ccw1O1Kp.s:32     .text:000000000000002c .L0 
+     /tmp/ccw1O1Kp.s:38     .text:0000000000000040 .L0 
+     /tmp/ccw1O1Kp.s:50     .text:0000000000000058 .L0 
+     /tmp/ccw1O1Kp.s:61     .text:0000000000000070 .L0 
+     /tmp/ccw1O1Kp.s:63     .text:000000000000007c .L0 
+     /tmp/ccw1O1Kp.s:47     .text:0000000000000058 .L2
+     /tmp/ccw1O1Kp.s:256    .debug_abbrev:0000000000000000 .Ldebug_abbrev0
+     /tmp/ccw1O1Kp.s:504    .debug_str:0000000000000130 .LASF20
+     /tmp/ccw1O1Kp.s:508    .debug_str:0000000000000203 .LASF21
+     /tmp/ccw1O1Kp.s:486    .debug_str:0000000000000095 .LASF22
+     /tmp/ccw1O1Kp.s:5      .text:0000000000000000 .Ltext0
+     /tmp/ccw1O1Kp.s:82     .text:00000000000000a4 .Letext0
+     /tmp/ccw1O1Kp.s:462    .debug_line:0000000000000000 .Ldebug_line0
+     /tmp/ccw1O1Kp.s:468    .debug_str:000000000000001a .LASF0
+     /tmp/ccw1O1Kp.s:502    .debug_str:000000000000011d .LASF1
+     /tmp/ccw1O1Kp.s:492    .debug_str:00000000000000c4 .LASF2
+     /tmp/ccw1O1Kp.s:484    .debug_str:000000000000008e .LASF4
+     /tmp/ccw1O1Kp.s:480    .debug_str:0000000000000069 .LASF3
+GAS LISTING /tmp/ccw1O1Kp.s 			page 4
+
+
+     /tmp/ccw1O1Kp.s:476    .debug_str:0000000000000052 .LASF5
+     /tmp/ccw1O1Kp.s:482    .debug_str:000000000000007b .LASF6
+     /tmp/ccw1O1Kp.s:500    .debug_str:000000000000010a .LASF7
+     /tmp/ccw1O1Kp.s:464    .debug_str:0000000000000000 .LASF8
+     /tmp/ccw1O1Kp.s:472    .debug_str:0000000000000035 .LASF9
+     /tmp/ccw1O1Kp.s:474    .debug_str:0000000000000043 .LASF10
+     /tmp/ccw1O1Kp.s:506    .debug_str:00000000000001f4 .LASF11
+     /tmp/ccw1O1Kp.s:478    .debug_str:0000000000000059 .LASF12
+     /tmp/ccw1O1Kp.s:512    .debug_str:0000000000000216 .LASF13
+     /tmp/ccw1O1Kp.s:490    .debug_str:00000000000000b8 .LASF14
+     /tmp/ccw1O1Kp.s:498    .debug_str:00000000000000f4 .LASF15
+     /tmp/ccw1O1Kp.s:496    .debug_str:00000000000000de .LASF16
+     /tmp/ccw1O1Kp.s:494    .debug_str:00000000000000d2 .LASF23
+     /tmp/ccw1O1Kp.s:510    .debug_str:0000000000000211 .LASF17
+     /tmp/ccw1O1Kp.s:514    .debug_str:0000000000000226 .LASF18
+     /tmp/ccw1O1Kp.s:488    .debug_str:00000000000000b3 .LASF19
+     /tmp/ccw1O1Kp.s:466    .debug_str:0000000000000010 .LASF24
+     /tmp/ccw1O1Kp.s:470    .debug_str:0000000000000027 .LASF25
+     /tmp/ccw1O1Kp.s:10     .text:0000000000000000 .LFB1
+     /tmp/ccw1O1Kp.s:80     .text:00000000000000a4 .LFE1
+     /tmp/ccw1O1Kp.s:86     .debug_info:0000000000000000 .Ldebug_info0
+
+UNDEFINED SYMBOLS
+HEAP_START_ADDR
+_ZN15MemoryAllocator6hStartE
+HEAP_END_ADDR
+_ZN15MemoryAllocator4hEndE
+_ZN15MemoryAllocator11freeMemHeadE
